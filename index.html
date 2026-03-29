@@ -1,0 +1,1614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Space Honeybees</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:#07090f;color:#e8e0d0;font-family:'Palatino Linotype',Georgia,serif;min-height:100vh;}
+input,select,textarea{font-family:'Palatino Linotype',Georgia,serif;color:#e8e0d0;background:#12141c;border:1px solid #1e2535;border-radius:10px;padding:10px 13px;font-size:13px;width:100%;outline:none;}
+input::placeholder,textarea::placeholder{color:#374151;}
+select option{background:#12141c;color:#e8e0d0;}
+button{cursor:pointer;font-family:'Palatino Linotype',Georgia,serif;border:none;transition:filter 0.15s;}
+button:hover:not(:disabled){filter:brightness(1.1);}
+button:disabled{opacity:0.5;cursor:not-allowed;}
+::-webkit-scrollbar{width:6px;}::-webkit-scrollbar-track{background:#07090f;}::-webkit-scrollbar-thumb{background:#1e2535;border-radius:3px;}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+.spin{animation:spin 1s linear infinite;display:inline-block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fadeup{animation:fadeUp 0.3s ease forwards;}
+.drop-zone{border:2px dashed #1e3a5f;border-radius:14px;padding:32px;text-align:center;cursor:pointer;transition:all 0.2s;}
+.drop-zone:hover,.drop-zone.over{border-color:#f59e0b;background:#120e05;}
+.card{background:#0c0e16;border:1px solid #1e2535;border-radius:16px;padding:22px;margin-bottom:16px;}
+.pill{display:inline-block;padding:3px 9px;border-radius:20px;font-size:10px;font-family:'Courier New',monospace;letter-spacing:1px;font-weight:700;}
+.lbl{font-size:10px;color:#374151;letter-spacing:2px;font-family:'Courier New',monospace;margin-bottom:8px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.inner{background:#12141c;border-radius:10px;padding:12px;}
+.signals{background:rgba(245,158,11,0.05);border:1px solid rgba(245,158,11,0.15);border-radius:10px;padding:10px 13px;margin-bottom:12px;}
+.sig-row{display:flex;gap:8px;margin-bottom:5px;font-size:13px;line-height:1.5;}
+.sig-row:last-child{margin-bottom:0;}
+.tag-row{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+.btn-honey{background:linear-gradient(135deg,#92400e,#f59e0b);color:#07090f;border-radius:10px;padding:10px 18px;font-size:13px;font-weight:700;}
+.btn-green{background:linear-gradient(135deg,#14532d,#166534);color:#bbf7d0;border:1px solid rgba(22,163,74,0.2);border-radius:10px;padding:10px 18px;font-size:13px;font-weight:600;}
+.btn-blue{background:linear-gradient(135deg,#1e40af,#3b82f6);color:#fff;border-radius:10px;padding:10px 18px;font-size:13px;font-weight:600;}
+.btn-ghost{background:#12141c;color:#8a7f6e;border:1px solid #1e2535;border-radius:10px;padding:10px 18px;font-size:13px;}
+.btn-danger{background:#12141c;color:#ef4444;border:1px solid rgba(239,68,68,0.15);border-radius:10px;padding:10px 18px;font-size:13px;}
+.btn-sm{padding:6px 12px;font-size:11px;border-radius:8px;}
+.nav-btn{padding:8px 14px;border-radius:10px;font-size:12px;font-weight:600;font-family:'Courier New',monospace;display:flex;align-items:center;gap:5px;}
+.nav-btn.active{background:#120e05;color:#f59e0b;border:1px solid #f59e0b;}
+.nav-btn.inactive{background:#0c0e16;color:#8a7f6e;border:1px solid #1e2535;}
+.badge{background:#f59e0b;color:#07090f;border-radius:10px;padding:1px 6px;font-size:10px;font-weight:700;margin-left:2px;}
+.badge-green{background:#22c55e;color:#07090f;border-radius:10px;padding:1px 6px;font-size:10px;font-weight:700;margin-left:2px;}
+.score-badge{border-radius:8px;padding:4px 11px;font-size:11px;font-weight:700;letter-spacing:1.5px;font-family:'Courier New',monospace;}
+.accent-bar{position:absolute;top:0;left:0;right:0;height:3px;border-radius:16px 16px 0 0;}
+.copy-btn{padding:6px 12px;border-radius:8px;font-size:11px;font-weight:600;font-family:'Courier New',monospace;}
+.copy-btn.idle{background:#12141c;color:#8a7f6e;border:1px solid #1e2535;}
+.copy-btn.ok{background:#166534;color:#bbf7d0;border:1px solid rgba(22,163,74,0.3);}
+.email-box{background:#070810;border:1px solid #1e2535;border-radius:12px;padding:14px;margin-bottom:14px;}
+.rel-note{background:#0a160f;border:1px solid rgba(22,163,74,0.2);border-radius:8px;padding:7px 12px;font-size:12px;color:#86efac;margin-bottom:10px;}
+.flag-row{background:#1a1006;border:1px solid rgba(146,64,14,0.3);border-radius:8px;padding:6px 12px;font-size:12px;color:#fbbf24;margin-bottom:8px;}
+.progress-bar{background:#0d1520;border:1px solid #1e3a5f;border-radius:10px;padding:11px 15px;font-size:13px;color:#93c5fd;display:flex;align-items:center;gap:10px;margin-top:14px;}
+.err-bar{background:#1a0808;border:1px solid rgba(239,68,68,0.3);border-radius:10px;padding:11px 15px;font-size:13px;color:#ef4444;margin-top:14px;}
+.rank-num{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;font-family:'Courier New',monospace;flex-shrink:0;}
+textarea{resize:vertical;line-height:1.7;}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+// ── Constants ─────────────────────────────────────────────────────────────────
+const API = "https://api.anthropic.com/v1/messages";
+const MODEL = "claude-sonnet-4-20250514";
+const SK = "hb_v4";
+const FL_MARKETS = ["Miami","Fort Lauderdale","West Palm Beach","Orlando","Tampa","Jacksonville","Boca Raton","Naples","Sarasota","Tallahassee"];
+const PRI = ["Miami","Fort Lauderdale","West Palm Beach"];
+const PRACTICES = ["Litigation","Corporate / M&A","Real Estate","Family Law","Criminal Defense","Immigration","Intellectual Property","Employment Law","Bankruptcy","Healthcare","Tax","Estate Planning"];
+const EXP_LEVELS = ["Law Student / Clerk","0–2 yrs","3–5 yrs","6–8 yrs","Partner-Track / Counsel","Partner","Any Level"];
+const C = {
+  honey:"#f59e0b", honeyDim:"#92400e", green:"#22c55e", blue:"#3b82f6",
+  blueText:"#93c5fd", blueDim:"#1e3a5f", red:"#ef4444", purple:"#a78bfa",
+  text:"#e8e0d0", muted:"#8a7f6e", dim:"#374151"
+};
+
+// ── Storage ───────────────────────────────────────────────────────────────────
+const load = () => { try { return JSON.parse(localStorage.getItem(SK)||"{}"); } catch { return {}; } };
+const save = p => { try { const s=load(); localStorage.setItem(SK,JSON.stringify({...s,...p})); } catch {} };
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+// ── CSV Parser ────────────────────────────────────────────────────────────────
+function parseCSV(text) {
+  const lines = text.trim().split(/\r?\n/).filter(l=>l.trim());
+  if (lines.length < 2) return [];
+  const headers = lines[0].split(",").map(h=>h.trim().toLowerCase().replace(/^"|"$/g,""));
+  return lines.slice(1).map(line => {
+    const vals = [];
+    let cur = "", inQ = false;
+    for (let i=0; i<line.length; i++) {
+      if (line[i]==='"') { inQ=!inQ; continue; }
+      if (line[i]===',' && !inQ) { vals.push(cur.trim()); cur=""; continue; }
+      cur += line[i];
+    }
+    vals.push(cur.trim());
+    const obj = {};
+    headers.forEach((h,i) => { obj[h] = (vals[i]||"").replace(/^"|"$/g,"").trim(); });
+    return obj;
+  }).filter(r => Object.values(r).some(v=>v));
+}
+
+// ── AI ────────────────────────────────────────────────────────────────────────
+async function callAI(prompt, retries=3) {
+  const key = window._hbKey;
+  if (!key) throw new Error("NO_KEY");
+  for (let attempt=0; attempt<retries; attempt++) {
+    if (attempt > 0) { await sleep(attempt * 12000); }
+    const resp = await fetch(API, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": key,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true"
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        max_tokens: 2000,
+        tools: [{type:"web_search_20250305", name:"web_search"}],
+        messages: [{role:"user", content:prompt}]
+      })
+    });
+    if (resp.status === 429) {
+      if (attempt === retries-1) throw new Error("Rate limited — wait 60 seconds and try again.");
+      continue;
+    }
+    const data = await resp.json();
+    if (data.error) throw new Error(data.error.message);
+    let text = data.content.filter(b=>b.type==="text").map(b=>b.text).join("");
+    text = text.replace(/```json\s*/g,"").replace(/```\s*/g,"").trim();
+    // Replace smart quotes
+    text = text.replace(/[\u2018\u2019]/g,"'").replace(/[\u201C\u201D]/g,'"');
+    // Extract JSON
+    const arrM = text.match(/\[[\s\S]*\]/);
+    const objM = text.match(/\{[\s\S]*\}/);
+    let js = arrM ? arrM[0] : objM ? objM[0] : text;
+    try { JSON.parse(js); return js; } catch(e) {}
+    // Object-by-object fallback
+    try {
+      const objs=[]; let depth=0, start=-1;
+      for(let i=0;i<js.length;i++){
+        if(js[i]==='{'){if(depth===0)start=i;depth++;}
+        else if(js[i]==='}'){depth--;if(depth===0&&start>=0){try{objs.push(JSON.parse(js.slice(start,i+1)));}catch{}start=-1;}}
+      }
+      if(objs.length) return JSON.stringify(objs);
+    } catch {}
+    throw new Error("Could not parse response — please try again.");
+  }
+}
+
+// ── Messaging rules ───────────────────────────────────────────────────────────
+const MSG = `
+OUTREACH RULES — follow strictly:
+- Peer-to-peer tone, trusted advisor, never salesy or vendor-like
+- NEVER use: "I wanted to reach out", "hope this finds you well", "came across your profile", "exciting opportunity", "perfect fit", "I would love to connect"
+- 100-150 words max. Subject: 6 words or fewer. Plain prose, no bullets, no bold
+- Open with something real and specific about their background or firm
+- Close with a soft question that invites reply — never "schedule a call" or "let me know if interested"
+- Do not use double quotes inside JSON string values — use single quotes or rephrase`;
+
+// ── Context ───────────────────────────────────────────────────────────────────
+function relCtx(rels) {
+  if (!rels.length) return "";
+  const firms = rels.filter(r=>r.type==="Client Firm").map(r=>r.name);
+  const placed = rels.filter(r=>r.type==="Placed Candidate").map(r=>`${r.name}${r.notes?", "+r.notes:""}`);
+  let c = "\n\nRELATIONSHIP CONTEXT:\n";
+  if (firms.length) c += `Existing client firms: ${firms.join(", ")}\n`;
+  if (placed.length) c += `Previously placed: ${placed.join("; ")}\n`;
+  return c;
+}
+
+function benchCtx(bench) {
+  if (!bench.length) return "";
+  return `\n\nACTIVE CANDIDATE BENCH (attorneys currently being placed):\n${bench.map(c=>`${c.name} — ${c.practiceArea||""} ${c.expLevel||""} ${c.currentFirm||""}`).join("\n")}\nWhen relevant, reference a bench candidate naturally in firm pitches without naming them specifically.`;
+}
+
+// ── AI Prompts ────────────────────────────────────────────────────────────────
+async function scoreContacts(contacts, openRoles, rels, batchNum, totalBatches) {
+  const roleStr = openRoles.map((r,i)=>`ROLE ${i+1}: ${r.clientFirm} — ${r.description}`).join("\n");
+  const contactStr = contacts.map((c,i)=>`${i+1}. ${c.name}${c.currentTitle?", "+c.currentTitle:""}${c.currentFirm?" at "+c.currentFirm:""}${c.location?", "+c.location:""}${c.practiceArea?", "+c.practiceArea:""}${c.barAdmissions?". Bar: "+c.barAdmissions:""}${c.graduationYear?". Grad: "+c.graduationYear:""}${c.lawSchool?". "+c.lawSchool:""}${c.languages?". Languages: "+c.languages:""}${c.linkedinUrl?" LinkedIn: "+c.linkedinUrl:""}${c.notes?". "+c.notes:""}`).join("\n");
+
+  const raw = await callAI(`You are a senior legal recruiter in Florida conducting professional market research. Today: ${new Date().toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"})}.
+
+OPEN ROLES — evaluate every attorney against each of these specifically:
+${roleStr}
+
+ATTORNEYS TO EVALUATE (batch ${batchNum} of ${totalBatches}):
+${contactStr}
+${relCtx(rels)}
+
+IMPORTANT: Many of these attorneys are currently based outside Florida but hold Florida Bar admission — they are strong lateral candidates for Florida firms. Do not penalize for current location if they have Florida Bar. Focus on:
+1. Practice area fit for the role
+2. Experience level fit
+3. Florida Bar admission (treat as a major positive signal)
+4. Web search for any intent signals — firm instability, recent activity, career plateau, graduation year suggesting they are ready for a move
+
+Only return attorneys with intentScore 5 or higher. Maximum 15 results per batch.
+
+CRITICAL: Return ONLY a JSON array. Start with [ end with ]. No other text.
+
+[{
+  "name": "attorney name",
+  "currentTitle": "title",
+  "currentFirm": "firm",
+  "location": "city, state",
+  "practiceArea": "area",
+  "matchedRole": "ROLE N: ClientFirm — role description",
+  "clientFirm": "client firm name only",
+  "intentScore": 8,
+  "intentReason": "1 sentence — strongest reason they are open to a move or fit this role",
+  "intentSignals": ["specific signal 1", "specific signal 2", "specific signal 3"],
+  "fitScore": 8,
+  "fitReason": "1 sentence on why they fit this specific role — mention FL Bar if relevant",
+  "draftOutreach": {
+    "subject": "6 words or fewer",
+    "body": "100-150 words. Specific to their background. Reference the Florida opportunity naturally. Soft close. Sign: [Your Name]"
+  },
+  "flags": []
+}]
+
+${MSG}`);
+  return JSON.parse(raw);
+}
+
+async function apiBDFirms(markets, rels, bench) {
+  const raw = await callAI(`You are a senior BD researcher for a Florida legal recruiting firm conducting professional market research. Today: ${new Date().toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"})}.
+
+Search law firm websites, LinkedIn, legal news, and job boards to find 5 Florida law firms actively hiring right now. For each, identify the real hiring contact from their public website or LinkedIn.
+
+Markets: ${markets.join(", ")}
+${relCtx(rels)}
+${benchCtx(bench)}
+${MSG}
+
+CRITICAL: Return ONLY a JSON array. Start with [ end with ]. No other text.
+
+[{
+  "firmName": "exact firm name",
+  "location": "city, FL",
+  "urgencyScore": 8,
+  "urgencyReason": "1 sentence citing specific signals",
+  "firmSummary": "2 sentences on firm",
+  "decisionMaker": {"name": "real contact", "title": "title", "email": "email", "linkedin": "url or Unknown"},
+  "intentSignals": ["specific signal 1", "signal 2", "signal 3"],
+  "openRoles": ["role1", "role2"],
+  "existingRelationship": false,
+  "relationshipNote": "",
+  "draftEmail": {
+    "subject": "6 words or fewer",
+    "body": "120-180 words. Open with a specific signal or firm news. Reference bench candidate if relevant without naming them. Soft specific CTA. Sign: [Your Name]"
+  },
+  "flags": []
+}]`);
+  return JSON.parse(raw);
+}
+
+async function apiCallPrep(candidate, openRoles) {
+  const matchedRole = openRoles.find(r=>candidate.matchedRole&&candidate.matchedRole.includes(r.clientFirm)) || openRoles[0];
+  const raw = await callAI(`You are a senior legal recruiting coach preparing a recruiter for a call with a candidate. Today: ${new Date().toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"})}.
+
+CANDIDATE: ${candidate.name}
+Current role: ${candidate.currentTitle||""} at ${candidate.currentFirm||""}
+Location: ${candidate.location||""}
+Practice area: ${candidate.practiceArea||""}
+Experience: ${candidate.expLevel||""}
+Intent signals: ${(candidate.intentSignals||[]).join("; ")}
+Intent reason: ${candidate.intentReason||""}
+${matchedRole?`ROLE BEING FILLED: ${matchedRole.clientFirm} — ${matchedRole.description}`:""}
+
+Search the web for any additional background on this attorney and their current firm. Then produce a comprehensive call preparation brief.
+
+CRITICAL: Return ONLY a JSON object. Start with { end with }. No other text.
+
+{
+  "openingMove": "The single best way to open this specific call — one sentence, natural and specific to this person. Not generic.",
+  "whyTheyMightMove": ["3 specific reasons this person is likely open to a conversation right now, based on their situation and signals"],
+  "whatTheyCareMost": ["3 things attorneys at this level and practice area typically care most about in a move — compensation, partnership track, client quality, work-life, platform size, etc. Specific to their profile."],
+  "roleSellingPoints": ["3-4 genuine reasons the matched role is attractive for someone with their background — be specific to the role and their experience"],
+  "questionsToAsk": ["5 questions to ask during the call to qualify and build rapport — open-ended, conversational, not interrogation"],
+  "likelyObjections": [
+    {"objection": "the most likely pushback from this specific person", "response": "how to handle it naturally and honestly — 2-3 sentences"},
+    {"objection": "second likely objection", "response": "response"},
+    {"objection": "third likely objection", "response": "response"}
+  ],
+  "thingsToAvoid": ["2-3 specific things NOT to say or do on this call given what you know about them"],
+  "closingMove": "How to close the call if it goes well — what to propose as the next step, specifically"
+}`);
+  return JSON.parse(raw);
+}
+
+async function apiReengage(person) {
+  const raw = await callAI(`You are a legal recruiter writing a warm re-engagement message to an attorney you previously placed.
+${MSG}
+
+Attorney: ${person.name}
+Placed at: ${person.notes||"their current firm"}
+Year placed: ${person.placedYear||"a couple of years ago"}
+Practice area: ${person.practiceArea||"law"}
+
+Write a warm, brief check-in. Reference the original placement naturally — not as a sales pitch, but as a genuine touchpoint. Ask one open question about how things are going. Gently leave the door open without pressure. 80-120 words total.
+
+CRITICAL: Return ONLY a JSON object. Start with { end with }. No other text.
+{"subject":"6 words or fewer — warm and specific","body":"message. Sign: [Your Name]"}`);
+  return JSON.parse(raw);
+}
+
+// ── State ─────────────────────────────────────────────────────────────────────
+const stored = load();
+const state = {
+  view: stored.onboarded ? "app" : "key",
+  tab: "daily",
+  // Persisted
+  openRoles: stored.openRoles || [],
+  rels: stored.rels || [],
+  bench: stored.bench || [],
+  pipeline: stored.pipeline || [],
+  bdApproved: stored.bdApproved || [],
+  // Session only — CSV uploaded fresh each morning
+  uploadedContacts: [],
+  uploadedFileName: "",
+  reengageDrafts: {}, // keyed by rel id
+  // Daily results
+  results: [],
+  approved: [],
+  _roleFilter: null,
+  running: false,
+  progress: "",
+  progressPct: 0,
+  err: "",
+  lastRun: stored.lastRun || null,
+  // BD Bot
+  bdMarkets: stored.bdMarkets || [...PRI],
+  bdResults: [],
+  bdRunning: false,
+  bdProgress: "",
+  bdErr: "",
+};
+
+function persist() {
+  save({
+    openRoles: state.openRoles,
+    rels: state.rels,
+    bench: state.bench,
+    pipeline: state.pipeline,
+    bdApproved: state.bdApproved,
+    bdMarkets: state.bdMarkets,
+    lastRun: state.lastRun,
+    onboarded: true,
+  });
+}
+
+// ── Render ────────────────────────────────────────────────────────────────────
+function render() {
+  const app = document.getElementById("app");
+  if (!app) return;
+  if (state.view === "key") { app.innerHTML = renderKey(); bindKey(); return; }
+  app.innerHTML = renderShell();
+  bindShell();
+}
+
+function el(id) { return document.getElementById(id); }
+function val(id) { const e=el(id); return e?e.value.trim():""; }
+function on(id,ev,fn) { const e=el(id); if(e) e.addEventListener(ev,fn); }
+
+// ── Key Gate ──────────────────────────────────────────────────────────────────
+function renderKey() {
+  return `<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;">
+    <div style="background:#0c0e16;border:1px solid #1e2535;border-radius:20px;padding:44px;max-width:440px;width:100%;text-align:center;">
+      <div style="font-size:36px;margin-bottom:12px;">🍯</div>
+      <div style="font-size:10px;color:#f59e0b;letter-spacing:3px;font-family:'Courier New',monospace;margin-bottom:8px;">FLORIDA LEGAL RECRUITING</div>
+      <div style="font-size:28px;font-weight:700;margin-bottom:6px;">Space Honeybees</div>
+      <div style="font-size:13px;color:#8a7f6e;margin-bottom:28px;line-height:1.7;">Enter your Anthropic API key to begin.<br/>Stays in your browser — never stored externally.</div>
+      <input type="password" id="key-inp" placeholder="sk-ant-api03-..." style="margin-bottom:12px;text-align:center;font-size:14px;"/>
+      <div id="key-err" style="color:#ef4444;font-size:12px;margin-bottom:10px;display:none;"></div>
+      <button id="key-btn" class="btn-honey" style="width:100%;padding:13px;font-size:14px;">→ Enter Space Honeybees</button>
+      <div style="margin-top:16px;font-size:11px;color:#374151;">Get your key at <span style="color:#3b82f6;">console.anthropic.com</span></div>
+    </div>
+  </div>`;
+}
+function bindKey() {
+  const btn = el("key-btn"); if (!btn) return;
+  const go = () => {
+    const k = val("key-inp");
+    const errEl = el("key-err");
+    if (!k.startsWith("sk-ant-")) {
+      if (errEl) { errEl.textContent="Should start with sk-ant-"; errEl.style.display="block"; }
+      return;
+    }
+    window._hbKey = k;
+    state.view = "app";
+    persist();
+    render();
+  };
+  btn.addEventListener("click", go);
+  const inp = el("key-inp");
+  if (inp) inp.addEventListener("keydown", e=>{ if(e.key==="Enter") go(); });
+}
+
+// ── Shell ─────────────────────────────────────────────────────────────────────
+function renderShell() {
+  const tabs = [
+    {id:"daily", icon:"☀", label:"Daily Brief"},
+    {id:"pipeline", icon:"📋", label:"Pipeline", badge: state.pipeline.length},
+    {id:"bd", icon:"🏢", label:"BD Bot"},
+    {id:"settings", icon:"⚙", label:"Settings", badge: state.openRoles.length+state.rels.length+state.bench.length},
+  ];
+  const nav = tabs.map(t=>`
+    <button class="nav-btn ${state.tab===t.id?"active":"inactive"}" onclick="ST('${t.id}')">
+      ${t.icon} ${t.label}
+      ${t.badge>0?`<span class="badge">${t.badge}</span>`:""}
+    </button>`).join("");
+
+  let content = "";
+  if (state.tab==="daily") content = renderDaily();
+  if (state.tab==="pipeline") content = renderPipeline();
+  if (state.tab==="bd") content = renderBD();
+  if (state.tab==="settings") content = renderSettings();
+
+  return `<div style="min-height:100vh;padding-bottom:80px;">
+    <div style="background:linear-gradient(180deg,#0d0f18,#07090f);border-bottom:1px solid #1e2535;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <span style="font-size:22px;">🍯</span>
+        <div>
+          <div style="font-size:10px;color:#f59e0b;letter-spacing:3px;font-family:'Courier New',monospace;">FLORIDA LEGAL RECRUITING</div>
+          <div style="font-size:18px;font-weight:700;letter-spacing:-0.3px;">Space Honeybees</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;">${nav}</div>
+    </div>
+    <div style="max-width:820px;margin:0 auto;padding:24px 16px 0;">${content}</div>
+  </div>`;
+}
+window.ST = t => { state.tab=t; render(); };
+
+// ── Daily Brief ───────────────────────────────────────────────────────────────
+function renderDaily() {
+  const hasContacts = state.uploadedContacts.length > 0;
+  const hasRoles = state.openRoles.length > 0;
+  const canRun = hasContacts && hasRoles && !state.running;
+  const today = new Date().toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric"});
+
+  // Upload zone
+  const uploadZone = `
+    <div style="background:#080d14;border:1px solid #1e3a5f;border-radius:16px;padding:20px;margin-bottom:16px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <div style="width:7px;height:7px;border-radius:50%;background:#3b82f6;box-shadow:0 0 7px #3b82f6;"></div>
+        <div class="lbl" style="color:#3b82f6;margin-bottom:0;">STEP 1 — UPLOAD TODAY'S CONTACT SLICE</div>
+      </div>
+      <div style="font-size:12px;color:#8a7f6e;margin-bottom:14px;line-height:1.6;">
+        Export from Sales Navigator or your database, drop it here. Space Honeybees auto-detects Sales Navigator format. For other formats it'll walk you through mapping columns once — then remembers for next time.
+      </div>
+      ${hasContacts ? `
+        <div style="background:#0a160f;border:1px solid rgba(34,197,94,0.3);border-radius:10px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="color:#22c55e;font-size:13px;font-weight:600;">✓ ${state.uploadedContacts.length} contacts loaded</div>
+            <div style="color:#374151;font-size:11px;font-family:'Courier New',monospace;margin-top:2px;">
+              ${state.uploadedFileName}
+              ${state.uploadedIsSN ? `<span style="color:#3b82f6;margin-left:8px;">● Sales Navigator</span>` : ""}
+            </div>
+          </div>
+          <button class="btn-ghost btn-sm" onclick="clearUpload()">✕ Clear</button>
+        </div>` : `
+        <div class="drop-zone" id="daily-dz" onclick="document.getElementById('daily-file').click()"
+          ondragover="event.preventDefault();this.classList.add('over')"
+          ondragleave="this.classList.remove('over')"
+          ondrop="handleDailyDrop(event)">
+          <div style="font-size:28px;margin-bottom:8px;">📋</div>
+          <div style="font-size:14px;color:#8a7f6e;margin-bottom:6px;">Drop your CSV here or <span style="color:#3b82f6;">browse</span></div>
+          <div style="display:flex;justify-content:center;gap:16px;margin-top:4px;">
+            <span style="font-size:11px;color:#374151;font-family:'Courier New',monospace;">✓ Sales Navigator</span>
+            <span style="font-size:11px;color:#374151;font-family:'Courier New',monospace;">✓ Any database export</span>
+            <span style="font-size:11px;color:#374151;font-family:'Courier New',monospace;">✓ Custom CSV</span>
+          </div>
+        </div>
+        <input type="file" id="daily-file" accept=".csv,.txt" style="display:none;" onchange="handleDailyFile(this)"/>`}
+    </div>
+    ${state.csvHeaders ? renderColumnMapper() : ""}`;
+
+
+  // Open roles summary
+  const rolesZone = hasRoles ? `
+    <div style="background:#080f0a;border:1px solid rgba(34,197,94,0.2);border-radius:14px;padding:16px 20px;margin-bottom:16px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <div style="width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 7px #22c55e;"></div>
+        <div class="lbl" style="color:#22c55e;margin-bottom:0;">STEP 2 — OPEN ROLES (${state.openRoles.length})</div>
+      </div>
+      ${state.openRoles.map(r=>`<div style="font-size:13px;color:#e8e0d0;margin-bottom:4px;display:flex;gap:8px;"><span style="color:#22c55e;">▸</span><span><strong style="color:#22c55e;">${r.clientFirm}</strong> — ${r.description}</span></div>`).join("")}
+      <div style="margin-top:10px;font-size:11px;color:#374151;">Manage roles in Settings →</div>
+    </div>` : `
+    <div style="background:#1a0a08;border:1px solid rgba(239,68,68,0.2);border-radius:14px;padding:16px 20px;margin-bottom:16px;">
+      <div style="font-size:13px;color:#ef4444;margin-bottom:4px;">⚠ No open roles added</div>
+      <div style="font-size:12px;color:#8a7f6e;">Add your open roles in <span onclick="ST('settings')" style="color:#3b82f6;cursor:pointer;">Settings</span> before running.</div>
+    </div>`;
+
+  // Run button
+  const runBtn = `
+    <button class="${canRun?"btn-honey":"btn-ghost"}" style="width:100%;padding:14px;font-size:15px;font-weight:700;margin-bottom:20px;" onclick="runDaily()" ${!canRun?"disabled":""}>
+      ${state.running ? `<span class="spin">⟳</span> Scoring contacts...` : "☀  Run Today's Brief"}
+    </button>`;
+
+  // Progress
+  const progressEl = state.running && state.progress ? `
+    <div class="progress-bar" style="margin-bottom:16px;">
+      <span class="spin">⟳</span>
+      <div style="flex:1;">
+        <div style="margin-bottom:4px;">${state.progress}</div>
+        ${state.progressPct>0?`<div style="height:3px;background:#1e2535;border-radius:2px;"><div style="height:3px;background:#3b82f6;border-radius:2px;width:${state.progressPct}%;transition:width 0.5s;"></div></div>`:""}
+      </div>
+    </div>` : "";
+
+  const errEl = state.err ? `<div class="err-bar" style="margin-bottom:16px;">${state.err}</div>` : "";
+
+  // Results
+  let resultsEl = "";
+  if (state.results.length > 0) {
+    // Build role coverage summary
+    const roleCounts = {};
+    state.openRoles.forEach(r => { roleCounts[r.clientFirm] = 0; });
+    state.results.forEach(c => { if (c.clientFirm) roleCounts[c.clientFirm] = (roleCounts[c.clientFirm]||0) + 1; });
+
+    const roleSummary = state.openRoles.length > 1 ? `
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;">
+        ${state.openRoles.map(r => {
+          const count = roleCounts[r.clientFirm]||0;
+          const color = count>=3?C.green:count>=1?C.honey:C.red;
+          return `<div style="background:${color}0f;border:1px solid ${color}33;border-radius:10px;padding:8px 14px;cursor:pointer;" onclick="filterRole('${r.clientFirm}')">
+            <div style="font-size:12px;font-weight:600;color:${color};">${r.clientFirm}</div>
+            <div style="font-size:10px;color:#374151;font-family:'Courier New',monospace;margin-top:2px;">${count} candidate${count!==1?"s":""} · ${r.description.slice(0,35)}${r.description.length>35?"...":""}</div>
+          </div>`;
+        }).join("")}
+        ${state._roleFilter?`<button onclick="filterRole(null)" style="background:#12141c;border:1px solid #1e2535;border-radius:10px;padding:8px 14px;font-size:11px;color:#8a7f6e;font-family:'Courier New',monospace;">✕ Show all</button>`:""}
+      </div>` : "";
+
+    const filtered = state._roleFilter
+      ? state.results.filter(c => c.clientFirm === state._roleFilter)
+      : state.results;
+
+    resultsEl = `
+      <div style="margin-bottom:8px;">
+        <div style="font-size:11px;color:#f59e0b;letter-spacing:2px;font-family:'Courier New',monospace;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;">
+          <span>👤 ${state.results.length} CANDIDATES SCORED — RANKED BY INTENT${state._roleFilter?` · FILTERING: ${state._roleFilter}`:""}</span>
+          <span style="color:#374151;">${state.lastRun?`Run: ${state.lastRun}`:""}</span>
+        </div>
+        ${roleSummary}
+        ${filtered.map((c,i)=>renderCandCard(c,i,"res")).join("")}
+      </div>`;
+  }
+
+  let approvedEl = "";
+  if (state.approved.length > 0) {
+    approvedEl = `
+      <div style="${state.results.length?"margin-top:24px;":""}">
+        <div style="font-size:11px;color:#22c55e;letter-spacing:2px;font-family:'Courier New',monospace;margin-bottom:14px;">✓ APPROVED — READY TO SEND (${state.approved.length})</div>
+        ${state.approved.map((c,i)=>renderApproved(c,i,"res")).join("")}
+      </div>`;
+  }
+
+  // Empty state
+  const emptyEl = !state.running && !state.results.length && !state.approved.length ? `
+    <div style="text-align:center;color:#374151;padding:60px 20px;">
+      <div style="font-size:40px;margin-bottom:14px;">🍯</div>
+      <div style="font-size:16px;color:#8a7f6e;margin-bottom:8px;">Ready when you are.</div>
+      <div style="font-size:13px;line-height:1.8;">Upload this morning's contact slice, then hit <strong style="color:#f59e0b;">Run Today's Brief</strong><br/>to surface the top 25 most moveable attorneys from your list.</div>
+    </div>` : "";
+
+  // Re-engage: placed candidates 2+ years ago with no recent pipeline activity
+  const now = new Date();
+  const reengageList = state.rels.filter(r => {
+    if (r.type !== "Placed Candidate") return false;
+    const yr = parseInt(r.placedYear);
+    if (!yr) return false;
+    if (now.getFullYear() - yr < 2) return false;
+    // Check if already in pipeline recently
+    const inPipeline = state.pipeline.find(p =>
+      p.name === r.name &&
+      ["Contacted","Responded","Meeting Set","Interviewing"].includes(p.status)
+    );
+    return !inPipeline;
+  });
+
+  const reengageBanner = reengageList.length ? `
+    <div style="background:#0d0920;border:1px solid rgba(167,139,250,0.3);border-radius:16px;padding:18px;margin-bottom:16px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <div style="width:7px;height:7px;border-radius:50%;background:#a78bfa;box-shadow:0 0 7px #a78bfa;"></div>
+        <div class="lbl" style="color:#a78bfa;margin-bottom:0;">🔄 RE-ENGAGE — ${reengageList.length} PAST PLACEMENT${reengageList.length!==1?"S":""} DUE FOR A CHECK-IN</div>
+      </div>
+      <div style="font-size:12px;color:#8a7f6e;margin-bottom:14px;line-height:1.6;">These attorneys were placed 2+ years ago and are not currently active in your pipeline. It may be time to reconnect — they could be ready for their next move, or refer someone who is.</div>
+      <div style="display:flex;flex-direction:column;gap:8px;">
+        ${reengageList.map(r => {
+          const draft = state.reengageDrafts[r.id];
+          const drafting = r._drafting;
+          return `<div style="background:#12141c;border:1px solid rgba(167,139,250,0.2);border-radius:12px;padding:14px 16px;">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;${draft?"margin-bottom:12px;":""}">
+              <div>
+                <div style="font-size:14px;font-weight:600;color:#e8e0d0;margin-bottom:2px;">${r.name}</div>
+                <div style="font-size:12px;color:#8a7f6e;">${r.notes||"Previously placed"}${r.placedYear?" · "+r.placedYear:""}</div>
+              </div>
+              ${!draft?`<button onclick="draftReengage('${r.id}')" id="re-btn-${r.id}" style="background:#1a1030;border:1px solid rgba(167,139,250,0.3);border-radius:8px;padding:6px 12px;font-size:11px;color:#a78bfa;font-family:'Courier New',monospace;white-space:nowrap;">
+                ${drafting?`<span class="spin">⟳</span> Drafting...`:"✉ Draft Check-in"}
+              </button>`:`
+              <button onclick="clearReengage('${r.id}')" style="background:transparent;border:none;color:#374151;font-size:11px;font-family:'Courier New',monospace;cursor:pointer;">✕</button>`}
+            </div>
+            ${draft?`
+              <div style="background:#070510;border:1px solid rgba(167,139,250,0.15);border-radius:10px;padding:12px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                  <div class="lbl" style="color:#a78bfa;margin-bottom:0;">CHECK-IN MESSAGE</div>
+                  <button class="copy-btn idle" id="re-copy-${r.id}" onclick="copyReengage('${r.id}')">⎘ Copy</button>
+                </div>
+                <div style="color:#8a7f6e;font-size:12px;font-family:'Courier New',monospace;margin-bottom:6px;">Subject: <span style="color:#e8e0d0;">${draft.subject||""}</span></div>
+                <div style="font-size:13px;line-height:1.8;white-space:pre-wrap;color:#e8e0d0;" id="re-body-${r.id}">${draft.body||""}</div>
+              </div>`:""}
+          </div>`;
+        }).join("")}
+      </div>
+    </div>` : "";
+
+  return uploadZone + rolesZone + reengageBanner + runBtn + progressEl + errEl + resultsEl + approvedEl + emptyEl;
+}
+
+// ── Candidate Card ────────────────────────────────────────────────────────────
+function renderCandCard(c, i, prefix) {
+  const score = c.intentScore||c.fitScore||0;
+  const color = score>=8?C.green:score>=6?C.honey:C.red;
+  const subj = c.draftOutreach?.subject||"";
+  const body = c.draftOutreach?.body||"";
+
+  return `<div class="card fadeup" style="position:relative;overflow:hidden;border-color:${c.existingRelationship?"rgba(34,197,94,0.4)":"#1e2535"}">
+    <div class="accent-bar" style="background:linear-gradient(90deg,${color},transparent);opacity:.6;"></div>
+    <div style="display:flex;gap:14px;align-items:flex-start;margin-bottom:12px;">
+      <div class="rank-num" style="background:${color}18;color:${color};border:1px solid ${color}44;">${i+1}</div>
+      <div style="flex:1;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;">
+          <div>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:3px;">
+              <div style="font-size:18px;font-weight:700;">${c.name}</div>
+              ${c.existingRelationship?`<span class="pill" style="color:#22c55e;background:#0a160f;border:1px solid rgba(34,197,94,0.3);">KNOWN</span>`:""}
+            </div>
+            <div style="color:#8a7f6e;font-size:13px;">${c.currentTitle||""} · <span style="color:#f59e0b;">${c.currentFirm||""}</span></div>
+            <div style="color:#374151;font-size:11px;font-family:'Courier New',monospace;margin-top:1px;">${c.location||""}</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <div class="score-badge" style="background:${color}18;border:1px solid ${color}44;color:${color};margin-bottom:5px;">INTENT ${score}/10</div>
+            <div style="font-size:11px;color:#8a7f6e;max-width:160px;text-align:right;line-height:1.4;">${(c.intentReason||"").split(".")[0]}.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    ${c.matchedRole?`<div style="background:#0d1520;border:1px solid #1e3a5f;border-radius:8px;padding:6px 12px;font-size:12px;color:#93c5fd;margin-bottom:10px;">🎯 Matched: <strong>${c.matchedRole}</strong></div>`:""}
+    ${c.relationshipNote?`<div class="rel-note">💬 ${c.relationshipNote}</div>`:""}
+    ${c.practiceArea?`<div class="tag-row"><span class="pill" style="color:#f59e0b;background:#1a1205;border:1px solid rgba(146,64,14,0.4);">${c.practiceArea}</span></div>`:""}
+
+    <div class="two-col">
+      <div class="inner">
+        <div class="lbl">INTENT SIGNALS</div>
+        ${(c.intentSignals||[]).filter(Boolean).map(s=>`<div style="display:flex;gap:7px;font-size:12px;margin-bottom:5px;line-height:1.4;"><span style="color:#f59e0b;font-size:10px;margin-top:2px;flex-shrink:0;">→</span>${s}</div>`).join("")}
+      </div>
+      <div class="inner">
+        <div class="lbl">FIT FOR ROLE</div>
+        <div style="font-size:12px;color:#8a7f6e;line-height:1.6;">${c.fitReason||""}</div>
+        ${c.fitScore?`<div style="margin-top:8px;font-size:11px;font-family:'Courier New',monospace;color:${color};">FIT ${c.fitScore}/10</div>`:""}
+      </div>
+    </div>
+
+    ${(c.flags||[]).filter(Boolean).map(f=>`<div class="flag-row">⚠ ${f}</div>`).join("")}
+
+    <div class="email-box">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div class="lbl" style="margin-bottom:0;">DRAFT OUTREACH</div>
+        <button class="copy-btn idle" id="copy-${prefix}-${i}" onclick="copyMsg('body-${prefix}-${i}','copy-${prefix}-${i}','subj-${prefix}-${i}')">⎘ Copy</button>
+      </div>
+      <div id="view-${prefix}-${i}">
+        <div style="color:#8a7f6e;font-size:12px;font-family:'Courier New',monospace;margin-bottom:6px;">Subject: <span style="color:#e8e0d0;" id="subj-${prefix}-${i}">${subj}</span></div>
+        <div style="font-size:13px;line-height:1.85;white-space:pre-wrap;" id="body-${prefix}-${i}">${body}</div>
+      </div>
+      <div id="edit-${prefix}-${i}" style="display:none;">
+        <input id="einp-subj-${prefix}-${i}" value="${subj.replace(/"/g,'&quot;')}" style="margin-bottom:8px;font-family:'Courier New',monospace;font-size:12px;"/>
+        <textarea id="einp-body-${prefix}-${i}" rows="6">${body}</textarea>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;">
+      <button class="btn-green" style="flex:2;" onclick="approveC(${i},'${prefix}')">✓ Approve & Queue</button>
+      <button class="btn-ghost" onclick="toggleEdit(${i},'${prefix}')">✎ Edit</button>
+      <button class="btn-danger" onclick="skipC(${i},'${prefix}')">✕ Skip</button>
+    </div>
+  </div>`;
+}
+
+function renderApproved(c, i, prefix) {
+  const subj = c.draftOutreach?.subject||"";
+  const body = c.draftOutreach?.body||"";
+  return `<div style="background:#0a160f;border:1px solid rgba(20,83,45,0.3);border-radius:14px;padding:18px;margin-bottom:12px;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;">
+          <span style="font-size:13px;">👤</span>
+          <div style="font-size:15px;font-weight:700;">${c.name}</div>
+          <span class="pill" style="color:#bbf7d0;background:#166534;border:1px solid rgba(22,163,74,0.3);">APPROVED</span>
+        </div>
+        <div style="font-size:11px;color:#8a7f6e;">${c.currentTitle||""} · ${c.currentFirm||""}</div>
+        <div style="font-size:10px;color:#374151;font-family:'Courier New',monospace;margin-top:1px;">${c.approvedAt||""}</div>
+      </div>
+      <button class="copy-btn idle" id="appr-copy-${i}" onclick="copyMsg('appr-body-${i}','appr-copy-${i}','appr-subj-${i}')">⎘ Copy</button>
+    </div>
+    <div style="background:#12141c;border-radius:10px;padding:13px;">
+      <div style="color:#8a7f6e;font-size:11px;font-family:'Courier New',monospace;margin-bottom:5px;">Subject: <span id="appr-subj-${i}">${subj}</span></div>
+      <div style="color:#8a7f6e;font-size:13px;line-height:1.7;white-space:pre-wrap;" id="appr-body-${i}">${body}</div>
+    </div>
+  </div>`;
+}
+
+// ── Pipeline Tab ──────────────────────────────────────────────────────────────
+const STATUSES = [
+  {id:"Contacted", color:"#3b82f6", bg:"#0d1520"},
+  {id:"Responded", color:"#f59e0b", bg:"#1a1205"},
+  {id:"Meeting Set", color:"#a78bfa", bg:"#1a1030"},
+  {id:"Interviewing", color:"#22d3ee", bg:"#0a1a20"},
+  {id:"Placed", color:"#22c55e", bg:"#0a160f"},
+  {id:"Not Interested", color:"#ef4444", bg:"#1a0808"},
+  {id:"On Hold", color:"#8a7f6e", bg:"#12141c"},
+];
+
+function getStatus(s) { return STATUSES.find(x=>x.id===s)||STATUSES[0]; }
+
+function renderPipeline() {
+  if (!state.pipeline.length) {
+    return `<div style="text-align:center;color:#374151;padding:80px 20px;">
+      <div style="font-size:40px;margin-bottom:14px;">📋</div>
+      <div style="font-size:16px;color:#8a7f6e;margin-bottom:8px;">Your pipeline is empty.</div>
+      <div style="font-size:13px;line-height:1.8;">Approve candidates from the Daily Brief to start tracking them here.<br/>Every approved candidate gets a status, notes log, and last contact date.</div>
+    </div>`;
+  }
+
+  // Group by status
+  const active = state.pipeline.filter(c=>!["Placed","Not Interested"].includes(c.status));
+  const closed = state.pipeline.filter(c=>["Placed","Not Interested"].includes(c.status));
+
+  // Summary bar
+  const statusCounts = {};
+  STATUSES.forEach(s => { statusCounts[s.id] = state.pipeline.filter(c=>c.status===s.id).length; });
+  const summaryBar = `
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px;">
+      ${STATUSES.map(s=>statusCounts[s.id]>0?`
+        <div style="background:${s.bg};border:1px solid ${s.color}44;border-radius:10px;padding:10px 16px;text-align:center;min-width:90px;">
+          <div style="font-size:20px;font-weight:700;color:${s.color};font-family:'Courier New',monospace;">${statusCounts[s.id]}</div>
+          <div style="font-size:9px;color:${s.color};letter-spacing:1px;font-family:'Courier New',monospace;margin-top:2px;opacity:.8;">${s.id.toUpperCase()}</div>
+        </div>`:"").join("")}
+    </div>`;
+
+  const renderEntry = (c, i) => {
+    const st = getStatus(c.status);
+    const notes = c.notes||[];
+    const prep = c.callPrep;
+    const prepping = c._prepping;
+
+    const prepSheet = prep ? `
+      <div style="background:#0a0c18;border:1px solid #1e3a5f;border-radius:12px;padding:18px;margin-bottom:12px;">
+        <div style="font-size:10px;color:#3b82f6;letter-spacing:2px;font-family:'Courier New',monospace;margin-bottom:16px;">📞 CALL PREP BRIEF — ${c.name}</div>
+
+        <div style="background:#12141c;border-radius:10px;padding:14px;margin-bottom:12px;border-left:3px solid #f59e0b;">
+          <div class="lbl" style="color:#f59e0b;margin-bottom:6px;">OPENING MOVE</div>
+          <div style="font-size:13px;color:#e8e0d0;line-height:1.6;font-style:italic;">"${prep.openingMove}"</div>
+        </div>
+
+        <div class="grid2" style="margin-bottom:12px;">
+          <div style="background:#12141c;border-radius:10px;padding:12px;">
+            <div class="lbl" style="color:#22c55e;margin-bottom:8px;">WHY THEY MIGHT MOVE</div>
+            ${(prep.whyTheyMightMove||[]).map(s=>`<div style="font-size:12px;color:#e8e0d0;margin-bottom:6px;display:flex;gap:7px;line-height:1.5;"><span style="color:#22c55e;flex-shrink:0;margin-top:1px;">→</span>${s}</div>`).join("")}
+          </div>
+          <div style="background:#12141c;border-radius:10px;padding:12px;">
+            <div class="lbl" style="color:#f59e0b;margin-bottom:8px;">WHAT THEY CARE ABOUT</div>
+            ${(prep.whatTheyCareMost||[]).map(s=>`<div style="font-size:12px;color:#e8e0d0;margin-bottom:6px;display:flex;gap:7px;line-height:1.5;"><span style="color:#f59e0b;flex-shrink:0;margin-top:1px;">◆</span>${s}</div>`).join("")}
+          </div>
+        </div>
+
+        <div style="background:#12141c;border-radius:10px;padding:12px;margin-bottom:12px;">
+          <div class="lbl" style="color:#93c5fd;margin-bottom:8px;">WHY THIS ROLE IS ATTRACTIVE FOR THEM</div>
+          ${(prep.roleSellingPoints||[]).map(s=>`<div style="font-size:12px;color:#e8e0d0;margin-bottom:5px;display:flex;gap:7px;line-height:1.5;"><span style="color:#3b82f6;flex-shrink:0;margin-top:1px;">▸</span>${s}</div>`).join("")}
+        </div>
+
+        <div style="background:#12141c;border-radius:10px;padding:12px;margin-bottom:12px;">
+          <div class="lbl" style="color:#a78bfa;margin-bottom:8px;">QUESTIONS TO ASK</div>
+          ${(prep.questionsToAsk||[]).map((s,qi)=>`<div style="font-size:12px;color:#e8e0d0;margin-bottom:7px;display:flex;gap:8px;line-height:1.5;"><span style="color:#a78bfa;font-family:'Courier New',monospace;font-size:10px;flex-shrink:0;margin-top:2px;">Q${qi+1}</span>${s}</div>`).join("")}
+        </div>
+
+        <div style="background:#12141c;border-radius:10px;padding:12px;margin-bottom:12px;">
+          <div class="lbl" style="color:#ef4444;margin-bottom:8px;">LIKELY OBJECTIONS & HOW TO HANDLE</div>
+          ${(prep.likelyObjections||[]).map(o=>`
+            <div style="margin-bottom:10px;padding-bottom:10px;border-bottom:1px solid #1e2535;">
+              <div style="font-size:12px;color:#ef4444;margin-bottom:4px;font-style:italic;">"${o.objection}"</div>
+              <div style="font-size:12px;color:#e8e0d0;line-height:1.55;">${o.response}</div>
+            </div>`).join("")}
+        </div>
+
+        <div class="grid2" style="margin-bottom:12px;">
+          <div style="background:#1a0808;border-radius:10px;padding:12px;border:1px solid rgba(239,68,68,0.15);">
+            <div class="lbl" style="color:#ef4444;margin-bottom:8px;">THINGS TO AVOID</div>
+            ${(prep.thingsToAvoid||[]).map(s=>`<div style="font-size:12px;color:#fca5a5;margin-bottom:5px;display:flex;gap:7px;line-height:1.5;"><span style="flex-shrink:0;">✕</span>${s}</div>`).join("")}
+          </div>
+          <div style="background:#0a160f;border-radius:10px;padding:12px;border:1px solid rgba(34,197,94,0.15);">
+            <div class="lbl" style="color:#22c55e;margin-bottom:8px;">HOW TO CLOSE</div>
+            <div style="font-size:12px;color:#86efac;line-height:1.6;">${prep.closingMove||""}</div>
+          </div>
+        </div>
+
+        <button onclick="clearPrep(${i})" style="background:transparent;border:none;color:#374151;font-size:11px;font-family:'Courier New',monospace;cursor:pointer;">✕ Clear prep sheet</button>
+      </div>` : "";
+
+    return `<div style="background:#0c0e16;border:1px solid ${st.color}33;border-radius:14px;padding:18px;margin-bottom:12px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
+        <div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;flex-wrap:wrap;">
+            <div style="font-size:16px;font-weight:700;">${c.name}</div>
+            ${c.matchedRole?`<span style="font-size:11px;color:#93c5fd;font-family:'Courier New',monospace;">→ ${c.matchedRole}</span>`:""}
+          </div>
+          <div style="font-size:12px;color:#8a7f6e;">${c.currentTitle||""} · ${c.currentFirm||""}</div>
+          <div style="font-size:10px;color:#374151;font-family:'Courier New',monospace;margin-top:2px;">Added ${c.approvedAt||""} · Last contact: ${c.lastContact||"—"}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
+          <select onchange="updateStatus(${i},this.value)" style="background:${st.bg};color:${st.color};border:1px solid ${st.color}44;border-radius:8px;padding:5px 10px;font-size:11px;font-family:'Courier New',monospace;font-weight:700;width:auto;">
+            ${STATUSES.map(s=>`<option value="${s.id}" ${c.status===s.id?"selected":""}>${s.id}</option>`).join("")}
+          </select>
+          <div style="display:flex;gap:6px;">
+            <button onclick="updateLastContact(${i})" style="background:#12141c;border:1px solid #1e2535;border-radius:8px;padding:4px 10px;font-size:10px;color:#8a7f6e;font-family:'Courier New',monospace;">📅 Contacted</button>
+            <button id="prep-btn-${i}" onclick="generatePrep(${i})" style="background:${prep?"#0d1520":"#12141c"};border:1px solid ${prep?"#1e3a5f":"#1e2535"};border-radius:8px;padding:4px 10px;font-size:10px;color:${prep?"#93c5fd":"#8a7f6e"};font-family:'Courier New',monospace;">
+              ${prepping?`<span class="spin">⟳</span> Prepping...`:prep?"📞 Refresh Prep":"📞 Call Prep"}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      ${prepSheet}
+
+      ${notes.length?`
+        <div style="background:#12141c;border-radius:10px;padding:12px;margin-bottom:10px;">
+          <div class="lbl" style="margin-bottom:8px;">ACTIVITY LOG</div>
+          ${notes.map(n=>`
+            <div style="display:flex;gap:10px;margin-bottom:7px;padding-bottom:7px;border-bottom:1px solid #1e2535;">
+              <div style="font-size:10px;color:#374151;font-family:'Courier New',monospace;white-space:nowrap;margin-top:1px;">${n.date}</div>
+              <div style="font-size:13px;color:#e8e0d0;line-height:1.5;">${n.text}</div>
+            </div>`).join("")}
+        </div>`:""}
+
+      <div style="display:flex;gap:8px;">
+        <input id="note-inp-${i}" placeholder="Log a note — e.g. 'Left voicemail', 'Meeting set for April 2nd', 'Not interested — check back in 6 months'" style="flex:1;font-size:12px;"/>
+        <button class="btn-ghost btn-sm" onclick="addNote(${i})" style="white-space:nowrap;">+ Log</button>
+      </div>
+
+      ${c.intentScore?`<div style="margin-top:10px;font-size:11px;color:#374151;font-family:'Courier New',monospace;">Intent score: ${c.intentScore}/10 · ${c.intentReason||""}</div>`:""}
+    </div>`;
+  };
+
+  return `<div>
+    ${summaryBar}
+    ${active.length?`
+      <div class="lbl" style="margin-bottom:12px;">ACTIVE — ${active.length} CANDIDATES</div>
+      ${active.map((c,i)=>renderEntry(c,state.pipeline.indexOf(c))).join("")}`:""}
+    ${closed.length?`
+      <div class="lbl" style="margin-top:${active.length?"20px":"0"};margin-bottom:12px;color:#374151;">CLOSED — ${closed.length} CANDIDATES</div>
+      ${closed.map((c,i)=>renderEntry(c,state.pipeline.indexOf(c))).join("")}`:""}
+  </div>`;
+}
+
+window.generatePrep = async i => {
+  const c = state.pipeline[i]; if (!c) return;
+  state.pipeline[i]._prepping = true; render();
+  try {
+    const prep = await apiCallPrep(c, state.openRoles);
+    state.pipeline[i].callPrep = prep;
+    state.pipeline[i]._prepping = false;
+    state.pipeline[i].notes.push({date:new Date().toLocaleDateString(), text:"Call prep generated."});
+    persist(); render();
+  } catch(e) {
+    state.pipeline[i]._prepping = false;
+    alert("Call prep failed: " + e.message);
+    render();
+  }
+};
+window.clearPrep = i => {
+  if (!state.pipeline[i]) return;
+  state.pipeline[i].callPrep = null;
+  persist(); render();
+};
+window.updateStatus = (i, status) => {
+  if (!state.pipeline[i]) return;
+  const prev = state.pipeline[i].status;
+  state.pipeline[i].status = status;
+  state.pipeline[i].notes.push({date: new Date().toLocaleDateString(), text:`Status changed: ${prev} → ${status}`});
+  persist(); render();
+};
+window.updateLastContact = i => {
+  if (!state.pipeline[i]) return;
+  state.pipeline[i].lastContact = new Date().toLocaleDateString();
+  state.pipeline[i].notes.push({date: new Date().toLocaleDateString(), text:"Marked as contacted."});
+  persist(); render();
+};
+window.addNote = i => {
+  const inp = el(`note-inp-${i}`);
+  if (!inp || !inp.value.trim()) return;
+  if (!state.pipeline[i]) return;
+  state.pipeline[i].notes.push({date: new Date().toLocaleDateString(), text: inp.value.trim()});
+  state.pipeline[i].lastContact = new Date().toLocaleDateString();
+  inp.value = "";
+  persist(); render();
+};
+window.draftReengage = async id => {
+  const r = state.rels.find(x=>x.id==id); if (!r) return;
+  r._drafting = true; render();
+  try {
+    const msg = await apiReengage(r);
+    state.reengageDrafts[id] = msg;
+    r._drafting = false;
+    render();
+  } catch(e) {
+    r._drafting = false;
+    alert("Draft failed: " + e.message);
+    render();
+  }
+};
+window.clearReengage = id => {
+  delete state.reengageDrafts[id];
+  render();
+};
+window.copyReengage = id => {
+  const draft = state.reengageDrafts[id]; if (!draft) return;
+  const text = `Subject: ${draft.subject}\n\n${draft.body}`;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = el(`re-copy-${id}`); if (!btn) return;
+    btn.className="copy-btn ok"; btn.textContent="✓ Copied";
+    setTimeout(()=>{ if(btn){btn.className="copy-btn idle";btn.textContent="⎘ Copy";} }, 2000);
+  });
+};
+window.addNote = i => {
+  const inp = el(`note-inp-${i}`);
+  if (!inp || !inp.value.trim()) return;
+  if (!state.pipeline[i]) return;
+  state.pipeline[i].notes.push({date: new Date().toLocaleDateString(), text: inp.value.trim()});
+  state.pipeline[i].lastContact = new Date().toLocaleDateString();
+  inp.value = "";
+  persist(); render();
+};
+
+// ── BD Bot Tab ────────────────────────────────────────────────────────────────
+function renderBD() {
+  const marketBtns = FL_MARKETS.map(m=>{
+    const on=state.bdMarkets.includes(m), ip=PRI.includes(m);
+    return `<button style="padding:5px 11px;border-radius:20px;font-size:11px;font-family:'Courier New',monospace;cursor:pointer;border:${on?`1px solid rgba(59,130,246,0.5)`:`1px solid #1e2535`};background:${on?"#0d1520":"#12141c"};color:${on?C.blue:C.dim};" onclick="toggleBDMarket('${m}')">${m}${ip&&on?" ★":""}</button>`;
+  }).join(" ");
+
+  const canRun = !state.bdRunning;
+
+  let resultsEl = "";
+  if (state.bdResults.length) {
+    resultsEl = `<div style="margin-top:20px;">
+      <div style="font-size:11px;color:#3b82f6;letter-spacing:2px;font-family:'Courier New',monospace;margin-bottom:14px;">🏢 ${state.bdResults.length} HIGH-INTENT FIRMS</div>
+      ${state.bdResults.map((f,i)=>renderFirmCard(f,i)).join("")}
+    </div>`;
+  }
+
+  let approvedEl = "";
+  if (state.bdApproved.length) {
+    approvedEl = `<div style="margin-top:${state.bdResults.length?"20px":"0"}">
+      <div style="font-size:11px;color:#22c55e;letter-spacing:2px;font-family:'Courier New',monospace;margin-bottom:14px;">✓ APPROVED FIRMS (${state.bdApproved.length})</div>
+      ${state.bdApproved.map((f,i)=>renderFirmApproved(f,i)).join("")}
+    </div>`;
+  }
+
+  const emptyEl = !state.bdRunning && !state.bdResults.length && !state.bdApproved.length ? `
+    <div style="text-align:center;color:#374151;padding:60px 20px;margin-top:20px;">
+      <div style="font-size:36px;margin-bottom:12px;">🏢</div>
+      <div style="font-size:14px;color:#8a7f6e;margin-bottom:6px;">BD Bot is on standby.</div>
+      <div style="font-size:13px;line-height:1.8;">Select your target markets and hit Run to find<br/>the highest-intent Florida firms to pitch today.</div>
+    </div>` : "";
+
+  return `<div>
+    <div style="background:linear-gradient(135deg,#080d14,#0c0e16);border:1px solid #1e3a5f;border-radius:16px;padding:22px;margin-bottom:20px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <div style="width:7px;height:7px;border-radius:50%;background:#3b82f6;box-shadow:0 0 7px #3b82f6;"></div>
+        <div class="lbl" style="color:#3b82f6;margin-bottom:0;">BD BOT — FIND NEW CLIENT FIRMS</div>
+      </div>
+      <div style="font-size:12px;color:#8a7f6e;margin-bottom:16px;line-height:1.6;">Run this when you want to prospect for new firm relationships. Searches Florida for firms actively hiring and drafts personalized pitches referencing your bench.</div>
+      <div class="lbl">TARGET MARKETS</div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;">${marketBtns}</div>
+      <button class="btn-blue" style="width:100%;padding:12px;font-size:14px;font-weight:700;" onclick="runBD()" ${!canRun?"disabled":""}>
+        ${state.bdRunning?`<span class="spin">⟳</span> Finding firms...`:"🏢 Run BD Bot"}
+      </button>
+      ${state.bdRunning&&state.bdProgress?`<div class="progress-bar" style="margin-top:12px;"><span class="spin">⟳</span>${state.bdProgress}</div>`:""}
+      ${state.bdErr?`<div class="err-bar" style="margin-top:12px;">${state.bdErr}</div>`:""}
+    </div>
+    ${resultsEl}${approvedEl}${emptyEl}
+  </div>`;
+}
+
+function renderFirmCard(f, i) {
+  const score = f.urgencyScore||0;
+  const color = score>=8?C.green:score>=6?C.honey:C.red;
+  const subj = f.draftEmail?.subject||"";
+  const body = f.draftEmail?.body||"";
+  return `<div class="card fadeup" style="position:relative;overflow:hidden;border-color:${f.existingRelationship?"rgba(34,197,94,0.4)":"#1e2535"}">
+    <div class="accent-bar" style="background:linear-gradient(90deg,${color},transparent);opacity:.6;"></div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:3px;">
+          <div style="font-size:18px;font-weight:700;">${f.firmName}</div>
+          ${f.existingRelationship?`<span class="pill" style="color:#22c55e;background:#0a160f;border:1px solid rgba(34,197,94,0.3);">EXISTING CLIENT</span>`:""}
+        </div>
+        <div style="font-size:11px;color:#374151;font-family:'Courier New',monospace;">${f.location}</div>
+      </div>
+      <div style="text-align:right;flex-shrink:0;margin-left:12px;">
+        <div class="score-badge" style="background:${color}18;border:1px solid ${color}44;color:${color};margin-bottom:5px;">URGENCY ${score}/10</div>
+        <div style="font-size:11px;color:#8a7f6e;max-width:160px;text-align:right;line-height:1.4;">${(f.urgencyReason||"").split(".")[0]}.</div>
+      </div>
+    </div>
+    ${f.relationshipNote?`<div class="rel-note">💬 ${f.relationshipNote}</div>`:""}
+    <div style="color:#8a7f6e;font-size:13px;line-height:1.6;margin-bottom:12px;font-style:italic;">${f.firmSummary||""}</div>
+    <div class="signals">
+      <div style="font-size:10px;color:#f59e0b;font-family:'Courier New',monospace;letter-spacing:1.5px;margin-bottom:7px;">⚡ INTENT SIGNALS</div>
+      ${(f.intentSignals||[]).filter(Boolean).map(s=>`<div class="sig-row"><span style="color:#f59e0b;font-size:11px;margin-top:2px;flex-shrink:0;">→</span><span>${s}</span></div>`).join("")}
+    </div>
+    <div class="two-col">
+      <div class="inner">
+        <div class="lbl">CONTACT</div>
+        <div style="font-weight:600;font-size:13px;">${f.decisionMaker?.name||"Unknown"}</div>
+        <div style="color:#8a7f6e;font-size:12px;">${f.decisionMaker?.title||""}</div>
+        <div style="color:#3b82f6;font-size:11px;margin-top:4px;font-family:'Courier New',monospace;">${f.decisionMaker?.email||""}</div>
+      </div>
+      <div class="inner">
+        <div class="lbl">OPEN ROLES</div>
+        ${(f.openRoles||[]).map(r=>`<div style="font-size:12px;margin-bottom:3px;display:flex;gap:6px;"><span style="color:#22c55e;font-size:9px;margin-top:3px;">▸</span>${r}</div>`).join("")}
+      </div>
+    </div>
+    ${(f.flags||[]).filter(Boolean).map(fg=>`<div class="flag-row">⚠ ${fg}</div>`).join("")}
+    <div class="email-box">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <div class="lbl" style="margin-bottom:0;">DRAFT EMAIL</div>
+        <button class="copy-btn idle" id="bd-copy-${i}" onclick="copyMsg('bd-body-${i}','bd-copy-${i}','bd-subj-${i}')">⎘ Copy</button>
+      </div>
+      <div id="bd-view-${i}">
+        <div style="color:#8a7f6e;font-size:12px;font-family:'Courier New',monospace;margin-bottom:6px;">Subject: <span style="color:#e8e0d0;" id="bd-subj-${i}">${subj}</span></div>
+        <div style="font-size:13px;line-height:1.85;white-space:pre-wrap;" id="bd-body-${i}">${body}</div>
+      </div>
+      <div id="bd-edit-${i}" style="display:none;">
+        <input id="bd-einp-subj-${i}" value="${subj.replace(/"/g,'&quot;')}" style="margin-bottom:8px;font-family:'Courier New',monospace;font-size:12px;"/>
+        <textarea id="bd-einp-body-${i}" rows="7">${body}</textarea>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button class="btn-green" style="flex:2;" onclick="approveBD(${i})">✓ Approve & Queue</button>
+      <button class="btn-ghost" onclick="toggleBDEdit(${i})">✎ Edit</button>
+      <button class="btn-danger" onclick="skipBD(${i})">✕ Skip</button>
+    </div>
+  </div>`;
+}
+
+function renderFirmApproved(f, i) {
+  const subj = f.draftEmail?.subject||"";
+  const body = f.draftEmail?.body||"";
+  return `<div style="background:#0a160f;border:1px solid rgba(20,83,45,0.3);border-radius:14px;padding:18px;margin-bottom:12px;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;">
+          <span>🏢</span>
+          <div style="font-size:15px;font-weight:700;">${f.firmName}</div>
+          <span class="pill" style="color:#bbf7d0;background:#166534;border:1px solid rgba(22,163,74,0.3);">APPROVED</span>
+        </div>
+        <div style="font-size:11px;color:#8a7f6e;">${f.location} · ${f.approvedAt||""}</div>
+      </div>
+      <button class="copy-btn idle" id="bdappr-copy-${i}" onclick="copyMsg('bdappr-body-${i}','bdappr-copy-${i}','bdappr-subj-${i}')">⎘ Copy</button>
+    </div>
+    <div style="background:#12141c;border-radius:10px;padding:13px;">
+      <div style="color:#8a7f6e;font-size:11px;font-family:'Courier New',monospace;margin-bottom:5px;">Subject: <span id="bdappr-subj-${i}">${subj}</span></div>
+      <div style="color:#8a7f6e;font-size:13px;line-height:1.7;white-space:pre-wrap;" id="bdappr-body-${i}">${body}</div>
+    </div>
+  </div>`;
+}
+
+// ── Settings Tab ──────────────────────────────────────────────────────────────
+function renderSettings() {
+  const roleList = state.openRoles.map((r,i)=>`
+    <div style="background:#12141c;border:1px solid rgba(34,197,94,0.2);border-radius:10px;padding:10px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:flex-start;">
+      <div><span style="color:#22c55e;font-weight:600;font-size:13px;">${r.clientFirm}</span><span style="color:#374151;font-size:12px;"> — </span><span style="color:#e8e0d0;font-size:13px;">${r.description}</span></div>
+      <button onclick="removeRole(${i})" style="background:transparent;border:none;color:#374151;margin-left:10px;">✕</button>
+    </div>`).join("");
+
+  const relList = state.rels.map((r,i)=>`
+    <div style="background:#0c0e16;border:1px solid #1e2535;border-radius:11px;padding:11px 14px;display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:7px;">
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;flex-wrap:wrap;">
+          <div style="font-size:13px;font-weight:600;">${r.name}</div>
+          <span class="pill" style="color:#3b82f6;background:#0d1520;border:1px solid #1e3a5f;">${r.type}</span>
+          ${r.placedYear?`<span style="font-size:10px;color:#f59e0b;font-family:'Courier New',monospace;">${r.placedYear}</span>`:""}
+        </div>
+        ${r.notes?`<div style="font-size:12px;color:#8a7f6e;font-style:italic;">${r.notes}</div>`:""}
+      </div>
+      <button onclick="removeRel(${i})" style="background:transparent;border:none;color:#374151;margin-left:10px;">✕</button>
+    </div>`).join("");
+
+  const benchList = state.bench.map((c,i)=>`
+    <div style="background:#0c0e16;border:1px solid rgba(34,197,94,0.2);border-radius:11px;padding:11px 14px;display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:7px;">
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px;flex-wrap:wrap;">
+          <div style="font-size:13px;font-weight:600;">${c.name}</div>
+          ${c.practiceArea?`<span class="pill" style="color:#f59e0b;background:#1a1205;border:1px solid rgba(146,64,14,0.4);">${c.practiceArea}</span>`:""}
+        </div>
+        <div style="font-size:12px;color:#8a7f6e;">${[c.currentTitle,c.currentFirm].filter(Boolean).join(" · ")}</div>
+      </div>
+      <button onclick="removeBench(${i})" style="background:transparent;border:none;color:#374151;margin-left:10px;">✕</button>
+    </div>`).join("");
+
+  return `<div>
+    <!-- Open Roles -->
+    <div style="background:#080f0a;border:1px solid rgba(34,197,94,0.2);border-radius:16px;padding:20px;margin-bottom:18px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+        <div style="width:7px;height:7px;border-radius:50%;background:#22c55e;box-shadow:0 0 7px #22c55e;"></div>
+        <div class="lbl" style="color:#22c55e;margin-bottom:0;">OPEN ROLES — ${state.openRoles.length} ACTIVE</div>
+      </div>
+      <div style="font-size:12px;color:#8a7f6e;margin-bottom:14px;line-height:1.6;">These drive Talent Bot scoring. Be specific — the more detail the better the matches.</div>
+      ${roleList}
+      <div class="grid2" style="margin-bottom:8px;">
+        <input id="s-rfirm" placeholder="Client firm name"/>
+        <input id="s-rdesc" placeholder="Role — e.g. Business Litigation Associate, Miami, 3+ yrs, FL Bar required"/>
+      </div>
+      <button class="btn-green" onclick="addRole()">+ Add Role</button>
+    </div>
+
+    <!-- Import placed candidates -->
+    <div style="background:#0d0920;border:1px solid rgba(167,139,250,0.2);border-radius:16px;padding:20px;margin-bottom:18px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+        <div style="width:7px;height:7px;border-radius:50%;background:#a78bfa;box-shadow:0 0 7px #a78bfa;"></div>
+        <div class="lbl" style="color:#a78bfa;margin-bottom:0;">IMPORT PLACED CANDIDATES — BULK CSV</div>
+      </div>
+      <div style="font-size:12px;color:#8a7f6e;margin-bottom:14px;line-height:1.6;">
+        Drop a CSV of attorneys you've previously placed. These power the <strong style="color:#a78bfa;">Re-Engage</strong> banner in your Daily Brief — surfacing past placements who may be ready for their next move. Recommended columns: <span style="color:#93c5fd;font-family:'Courier New',monospace;font-size:11px;">name, year placed, practice area, firm placed at, notes</span>
+      </div>
+      <div class="drop-zone" id="placed-dz" onclick="document.getElementById('placed-file').click()"
+        ondragover="event.preventDefault();this.classList.add('over')"
+        ondragleave="this.classList.remove('over')"
+        ondrop="handlePlacedDrop(event)">
+        <div style="font-size:24px;margin-bottom:6px;">🤝</div>
+        <div style="font-size:13px;color:#8a7f6e;">Drop placement history CSV or <span style="color:#a78bfa;">browse</span></div>
+      </div>
+      <input type="file" id="placed-file" accept=".csv,.txt" style="display:none;" onchange="handlePlacedFile(this)"/>
+      <div id="placed-msg" style="font-size:12px;margin-top:10px;font-family:'Courier New',monospace;display:none;"></div>
+    </div>
+
+    <!-- Relationship context -->
+    <div style="background:#080d14;border:1px solid #1e3a5f;border-radius:16px;padding:20px;margin-bottom:18px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+        <div style="width:7px;height:7px;border-radius:50%;background:#3b82f6;box-shadow:0 0 7px #3b82f6;"></div>
+        <div class="lbl" style="color:#3b82f6;margin-bottom:0;">RELATIONSHIPS — ${state.rels.length} CONTACTS</div>
+      </div>
+      <div style="font-size:12px;color:#8a7f6e;margin-bottom:14px;line-height:1.6;">Existing client firms and past placements. Used to personalize outreach and flag warm contacts.</div>
+      ${relList}
+      <div class="grid3" style="margin-bottom:8px;">
+        <input id="s-rname" placeholder="Name"/>
+        <select id="s-rtype"><option>Client Firm</option><option>Placed Candidate</option><option>Referral Source</option><option>Other</option></select>
+        <input id="s-ryear" placeholder="Year placed (if applicable)"/>
+      </div>
+      <input id="s-rnotes" placeholder="Notes — e.g. 'Placed Senior Associate 2022', 'Strong relationship with hiring partner'" style="margin-bottom:10px;"/>
+      <button class="btn-ghost" onclick="addRel()">+ Add Contact</button>
+    </div>
+
+    <!-- Candidate Bench -->
+    <div style="background:#080f0a;border:1px solid rgba(245,158,11,0.2);border-radius:16px;padding:20px;margin-bottom:18px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+        <div style="width:7px;height:7px;border-radius:50%;background:#f59e0b;box-shadow:0 0 7px #f59e0b;"></div>
+        <div class="lbl" style="color:#f59e0b;margin-bottom:0;">ACTIVE BENCH — ${state.bench.length} CANDIDATES</div>
+      </div>
+      <div style="font-size:12px;color:#8a7f6e;margin-bottom:14px;line-height:1.6;">Attorneys you are actively working to place. BD Bot references these when pitching firms.</div>
+      ${benchList}
+      <div class="grid2" style="margin-bottom:8px;">
+        <input id="b-name" placeholder="Attorney name"/>
+        <input id="b-pa" placeholder="Practice area"/>
+      </div>
+      <div class="grid2" style="margin-bottom:8px;">
+        <input id="b-title" placeholder="Current title"/>
+        <input id="b-firm" placeholder="Current firm"/>
+      </div>
+      <input id="b-notes" placeholder="Notes — e.g. 'Open to partnership track', 'South Florida only'" style="margin-bottom:10px;"/>
+      <button class="btn-honey" onclick="addBench()">+ Add to Bench</button>
+    </div>
+
+    <!-- CSV tip -->
+    <div style="background:#0c0e16;border:1px solid #1e2535;border-radius:14px;padding:18px;">
+      <div class="lbl">📋 CSV FORMAT TIP FOR DAILY UPLOAD</div>
+      <div style="font-size:13px;color:#8a7f6e;line-height:1.8;">
+        Export from your database with these columns for best results:<br/>
+        <span style="color:#93c5fd;font-family:'Courier New',monospace;font-size:12px;">name, title, firm, location, practice area, experience level, notes</span><br/><br/>
+        Pre-filter in your database by practice area and market before exporting. Upload 200–500 contacts per run for optimal scoring speed and cost.
+      </div>
+    </div>
+  </div>`;
+}
+
+// ── Event Handlers ────────────────────────────────────────────────────────────
+window.handleDailyDrop = e => {
+  e.preventDefault();
+  document.querySelector(".drop-zone.over")?.classList.remove("over");
+  loadDailyFile(e.dataTransfer.files[0]);
+};
+window.handleDailyFile = inp => { loadDailyFile(inp.files[0]); inp.value=""; };
+window.clearUpload = () => { state.uploadedContacts=[]; state.uploadedFileName=""; state.results=[]; state.err=""; render(); };
+
+// ── Column mapping ────────────────────────────────────────────────────────────
+// Sales Navigator known columns
+const SN_MAP = {
+  name: ["first name","last name"], // special case - combine
+  currentTitle: ["title","current job title","job title"],
+  currentFirm: ["company","current company","account name"],
+  location: ["geography","location","region"],
+  practiceArea: ["industry","function","department"],
+  expLevel: ["seniority level","seniority","level"],
+  notes: ["summary","about","note"],
+};
+
+// Generic fuzzy map — tries common variations
+const FUZZY_MAP = {
+  name: ["name","full name","attorney name","attorney","contact name","contact","lawyer","person"],
+  currentTitle: ["title","current title","position","job title","role","current role","current position"],
+  currentFirm: ["firm","current firm","company","organization","employer","law firm","current company","account"],
+  location: ["location","city","market","geography","office","office location","city state"],
+  practiceArea: ["practice area","practice","specialty","speciality","area","department","industry","group"],
+  expLevel: ["experience","experience level","seniority","level","years","yrs","class year"],
+  notes: ["notes","note","details","bio","summary","comments","description"],
+};
+
+function detectSalesNavigator(headers) {
+  // SN exports always have these
+  const snSignals = ["first name","last name","company","title","geography"];
+  const matches = snSignals.filter(s => headers.includes(s));
+  return matches.length >= 3;
+}
+
+function fuzzyMapRow(row, headers, customMap) {
+  const map = customMap || FUZZY_MAP;
+  const h = headers; // already lowercased
+  const get = (keys) => {
+    for (const k of keys) {
+      const found = h.find(col => col === k || col.includes(k) || k.includes(col));
+      if (found && row[found] && row[found].trim()) return row[found].trim();
+    }
+    return "";
+  };
+
+  // Special case: Sales Navigator splits first/last name
+  let name = "";
+  if (h.includes("first name") && h.includes("last name")) {
+    name = [row["first name"]||"", row["last name"]||""].filter(Boolean).join(" ").trim();
+  }
+  if (!name) name = get(map.name);
+
+  return {
+    name,
+    currentTitle: get(map.currentTitle),
+    currentFirm: get(map.currentFirm),
+    location: get(map.location),
+    practiceArea: get(map.practiceArea),
+    expLevel: get(map.expLevel),
+    notes: get(map.notes),
+  };
+}
+
+function buildContactsFromRows(rows, customMap) {
+  if (!rows.length) return [];
+  const headers = Object.keys(rows[0]).map(h => h.toLowerCase().trim());
+  return rows.map((r, i) => {
+    // Normalize keys to lowercase
+    const normalized = {};
+    Object.keys(r).forEach(k => { normalized[k.toLowerCase().trim()] = r[k]; });
+    const mapped = fuzzyMapRow(normalized, headers, customMap);
+
+    // Special handling: if name is empty but first/last exist, combine them
+    if (!mapped.name) {
+      const first = normalized["first name"]||normalized["firstname"]||"";
+      const last = normalized["last name"]||normalized["lastname"]||"";
+      if (first||last) mapped.name = [first,last].filter(Boolean).join(" ").trim();
+    }
+
+    // Pull extra fields this CSV has
+    mapped.email = normalized["email"]||normalized["e-mail"]||"";
+    mapped.linkedinUrl = normalized["linkedin url"]||normalized["linkedin"]||normalized["profile url"]||"";
+    mapped.barAdmissions = normalized["bar admissions"]||normalized["bar"]||"";
+    mapped.lawSchool = normalized["law school"]||normalized["school"]||"";
+    mapped.graduationYear = normalized["graduation year"]||normalized["grad year"]||normalized["class year"]||"";
+    mapped.languages = normalized["languages"]||"";
+
+    return { id: i, ...mapped };
+  }).filter(c => c.name);
+}
+
+function loadDailyFile(file) {
+  if (!file) return;
+  file.text().then(text => {
+    const rows = parseCSV(text);
+    if (!rows.length) { state.err="No contacts found — check your CSV format."; render(); return; }
+
+    const headers = Object.keys(rows[0]).map(h => h.toLowerCase().trim());
+    const isSN = detectSalesNavigator(headers);
+
+    // Try auto-map first
+    const contacts = buildContactsFromRows(rows, isSN ? SN_MAP : FUZZY_MAP);
+
+    if (contacts.length > 0) {
+      // Auto-map worked — check quality
+      const hasTitle = contacts.filter(c=>c.currentTitle).length;
+      const hasFirm = contacts.filter(c=>c.currentFirm).length;
+      const quality = Math.min(hasTitle, hasFirm) / contacts.length;
+
+      if (quality > 0.3 || isSN) {
+        // Good enough — load directly
+        state.uploadedContacts = contacts;
+        state.uploadedFileName = file.name;
+        state.uploadedIsSN = isSN;
+        state.csvPendingRows = null;
+        state.csvHeaders = null;
+        state.results = [];
+        state.err = "";
+        render();
+        return;
+      }
+    }
+
+    // Auto-map failed or low quality — show column mapper
+    state.csvPendingRows = rows;
+    state.csvHeaders = headers;
+    state.csvFileName = file.name;
+    state.csvCustomMap = load().csvCustomMap || {}; // restore saved mapping
+    render();
+  });
+}
+
+// Render column mapper UI
+function renderColumnMapper() {
+  const headers = state.csvHeaders || [];
+  const savedMap = state.csvCustomMap || {};
+  const fields = [
+    {key:"name", label:"Attorney Name", required:true},
+    {key:"currentTitle", label:"Current Title", required:false},
+    {key:"currentFirm", label:"Current Firm", required:false},
+    {key:"location", label:"Location / City", required:false},
+    {key:"practiceArea", label:"Practice Area", required:false},
+    {key:"expLevel", label:"Experience Level", required:false},
+    {key:"notes", label:"Notes", required:false},
+  ];
+
+  const opts = [`<option value="">— skip —</option>`, ...headers.map(h=>`<option value="${h}" ${savedMap[h]===h||""}>${h}</option>`)].join("");
+
+  const rows = fields.map(f => {
+    // Try to auto-suggest best match
+    const autoMatch = headers.find(h =>
+      FUZZY_MAP[f.key]?.some(k => h.includes(k) || k.includes(h))
+    ) || savedMap[f.key] || "";
+
+    return `<div style="display:grid;grid-template-columns:140px 1fr;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid #1e2535;">
+      <div>
+        <div style="font-size:13px;font-weight:600;color:#e8e0d0;">${f.label}</div>
+        ${f.required?`<div style="font-size:10px;color:#ef4444;font-family:'Courier New',monospace;">REQUIRED</div>`:`<div style="font-size:10px;color:#374151;font-family:'Courier New',monospace;">optional</div>`}
+      </div>
+      <select id="map-${f.key}" style="background:#12141c;border:1px solid #1e2535;border-radius:8px;padding:8px 10px;color:#e8e0d0;font-size:12px;font-family:'Courier New',monospace;">
+        ${headers.map(h=>`<option value="${h}" ${h===autoMatch?"selected":""}>${h}</option>`).join("")}
+        <option value="" ${!autoMatch?"selected":""}>— skip this field —</option>
+      </select>
+    </div>`;
+  }).join("");
+
+  return `<div style="background:#0a0c18;border:1px solid #1e3a5f;border-radius:16px;padding:20px;margin-bottom:16px;">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+      <div style="width:7px;height:7px;border-radius:50%;background:#f59e0b;box-shadow:0 0 7px #f59e0b;"></div>
+      <div class="lbl" style="color:#f59e0b;margin-bottom:0;">MAP YOUR COLUMNS — ${state.csvFileName||"uploaded file"}</div>
+    </div>
+    <div style="font-size:12px;color:#8a7f6e;margin-bottom:16px;line-height:1.6;">
+      Space Honeybees couldn't auto-detect your column format. Match your CSV columns to the fields below. This mapping will be saved for next time.
+      <span style="color:#374151;"> Detected ${headers.length} columns: ${headers.slice(0,6).join(", ")}${headers.length>6?"...":""}</span>
+    </div>
+    <div style="margin-bottom:16px;">${rows}</div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn-honey" style="flex:1;padding:11px;" onclick="applyColumnMap()">→ Apply Mapping &amp; Load Contacts</button>
+      <button class="btn-ghost" onclick="cancelColumnMap()">✕ Cancel</button>
+    </div>
+  </div>`;
+}
+
+window.applyColumnMap = () => {
+  const fields = ["name","currentTitle","currentFirm","location","practiceArea","expLevel","notes"];
+  const customMap = {};
+  fields.forEach(f => {
+    const sel = document.getElementById(`map-${f}`);
+    if (sel && sel.value) customMap[f] = [sel.value];
+  });
+
+  if (!customMap.name) { alert("Name column is required."); return; }
+
+  const contacts = buildContactsFromRows(state.csvPendingRows, customMap);
+  if (!contacts.length) { state.err="No contacts found with that mapping."; state.csvPendingRows=null; state.csvHeaders=null; render(); return; }
+
+  // Save mapping for next time
+  save({csvCustomMap: customMap});
+  state.csvCustomMap = customMap;
+
+  state.uploadedContacts = contacts;
+  state.uploadedFileName = state.csvFileName;
+  state.csvPendingRows = null;
+  state.csvHeaders = null;
+  state.results = [];
+  state.err = "";
+  render();
+};
+
+window.cancelColumnMap = () => {
+  state.csvPendingRows = null;
+  state.csvHeaders = null;
+  state.csvFileName = null;
+  render();
+};
+
+window.filterRole = firm => { state._roleFilter = firm; render(); };
+
+window.runDaily = async () => {
+  if (state.running || !state.uploadedContacts.length || !state.openRoles.length) return;
+  state.running = true; state.results = []; state.err = ""; state.progressPct = 0; state._roleFilter = null;
+  render();
+
+  const contacts = state.uploadedContacts;
+  const BATCH = 25; // score 25 at a time
+  const totalBatches = Math.ceil(contacts.length / BATCH);
+  const allResults = [];
+
+  try {
+    for (let b=0; b<totalBatches; b++) {
+      const batch = contacts.slice(b*BATCH, (b+1)*BATCH);
+      const pct = Math.round(((b+1)/totalBatches)*100);
+      state.progress = `Scoring batch ${b+1} of ${totalBatches} (${contacts.length} contacts total)...`;
+      state.progressPct = pct;
+      render();
+
+      try {
+        const scored = await scoreContacts(batch, state.openRoles, state.rels, b+1, totalBatches);
+        allResults.push(...scored);
+      } catch(e) {
+        console.warn(`Batch ${b+1} failed:`, e.message);
+      }
+
+      if (b < totalBatches-1) await sleep(3000);
+    }
+
+    // Sort by intentScore, take top 25
+    allResults.sort((a,b)=>(b.intentScore||0)-(a.intentScore||0));
+    state.results = allResults.slice(0,25);
+    state.lastRun = new Date().toLocaleString();
+    persist();
+  } catch(e) {
+    state.err = e.message==="NO_KEY"?"API key missing.":"Run failed: "+e.message;
+  }
+
+  state.running = false; state.progress = ""; state.progressPct = 0;
+  render();
+};
+
+window.approveC = (i, prefix) => {
+  const arr = prefix==="res"?state.results:[];
+  const c = arr[i];
+  if (!c) return;
+  const pipelineEntry = {
+    ...c,
+    pid: Date.now() + Math.random(),
+    approvedAt: new Date().toLocaleString(),
+    status: "Contacted",
+    notes: [],
+    noteInput: "",
+    lastContact: new Date().toLocaleDateString(),
+  };
+  state.approved.push(pipelineEntry);
+  state.pipeline.push(pipelineEntry);
+  arr.splice(i,1);
+  if (!state.bench.find(x=>x.name===c.name)) {
+    state.bench.push({id:Date.now(), name:c.name, currentTitle:c.currentTitle, currentFirm:c.currentFirm, practiceArea:c.practiceArea, expLevel:c.expLevel, notes:c.fitReason||""});
+  }
+  persist();
+  render();
+};
+window.skipC = (i, prefix) => {
+  const arr = prefix==="res"?state.results:[];
+  arr.splice(i,1); render();
+};
+window.toggleEdit = (i, prefix) => {
+  const v=el(`view-${prefix}-${i}`), ed=el(`edit-${prefix}-${i}`); if(!v||!ed) return;
+  const editing = ed.style.display!=="none";
+  if (editing) {
+    const ns=val(`einp-subj-${prefix}-${i}`), nb=el(`einp-body-${prefix}-${i}`)?.value||"";
+    const arr = prefix==="res"?state.results:[];
+    if (arr[i]) arr[i].draftOutreach = {subject:ns, body:nb};
+    v.style.display=""; ed.style.display="none";
+  } else { v.style.display="none"; ed.style.display=""; }
+};
+
+window.copyMsg = (bodyId, btnId, subjId) => {
+  const bodyEl=el(bodyId), subjEl=el(subjId);
+  if (!bodyEl) return;
+  const text = (subjEl?`Subject: ${subjEl.textContent}\n\n`:"")+bodyEl.textContent;
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn=el(btnId); if(!btn) return;
+    btn.className="copy-btn ok"; btn.textContent="✓ Copied";
+    setTimeout(()=>{ if(btn){btn.className="copy-btn idle";btn.textContent="⎘ Copy";} },2000);
+  });
+};
+
+// BD Bot handlers
+window.toggleBDMarket = m => {
+  if (state.bdMarkets.includes(m)) state.bdMarkets=state.bdMarkets.filter(x=>x!==m);
+  else state.bdMarkets.push(m);
+  render();
+};
+window.runBD = async () => {
+  if (state.bdRunning) return;
+  state.bdRunning=true; state.bdResults=[]; state.bdErr=""; state.bdProgress="Finding firms...";
+  render();
+  try {
+    const firms = await apiBDFirms(state.bdMarkets, state.rels, state.bench);
+    state.bdResults = firms.sort((a,b)=>(b.urgencyScore||0)-(a.urgencyScore||0));
+  } catch(e) { state.bdErr = e.message==="NO_KEY"?"API key missing.":"Run failed: "+e.message; }
+  state.bdRunning=false; state.bdProgress=""; render();
+};
+window.approveBD = i => {
+  const f=state.bdResults[i]; if(!f) return;
+  state.bdApproved.push({...f, approvedAt:new Date().toLocaleString()});
+  state.bdResults.splice(i,1); persist(); render();
+};
+window.skipBD = i => { state.bdResults.splice(i,1); render(); };
+window.toggleBDEdit = i => {
+  const v=el(`bd-view-${i}`), ed=el(`bd-edit-${i}`); if(!v||!ed) return;
+  const editing=ed.style.display!=="none";
+  if (editing) {
+    const ns=val(`bd-einp-subj-${i}`), nb=el(`bd-einp-body-${i}`)?.value||"";
+    if(state.bdResults[i]) state.bdResults[i].draftEmail={subject:ns,body:nb};
+    v.style.display=""; ed.style.display="none";
+  } else { v.style.display="none"; ed.style.display=""; }
+};
+
+// Settings handlers
+window.handlePlacedDrop = e => {
+  e.preventDefault();
+  document.querySelector("#placed-dz.over")?.classList.remove("over");
+  importPlacedFile(e.dataTransfer.files[0]);
+};
+window.handlePlacedFile = inp => { importPlacedFile(inp.files[0]); inp.value=""; };
+
+function importPlacedFile(file) {
+  if (!file) return;
+  file.text().then(text => {
+    const rows = parseCSV(text);
+    if (!rows.length) { showPlacedMsg("No records found — check CSV format.", C.red); return; }
+    const newRels = rows.map((r,i) => ({
+      id: Date.now() + i + Math.random(),
+      name: r.name || r["attorney name"] || r["full name"] || "",
+      type: "Placed Candidate",
+      strength: "Strong",
+      placedYear: r["year placed"] || r["year"] || r["placed year"] || "",
+      practiceArea: r["practice area"] || r.practice || "",
+      notes: r["firm placed at"] ? `Placed at ${r["firm placed at"]}${r.notes?". "+r.notes:""}` : r.notes || "",
+    })).filter(r => r.name);
+    if (!newRels.length) { showPlacedMsg("No valid names found.", C.red); return; }
+    const existing = new Set(state.rels.map(x => x.name.toLowerCase()));
+    const fresh = newRels.filter(x => !existing.has(x.name.toLowerCase()));
+    state.rels.push(...fresh);
+    persist();
+    showPlacedMsg(`✓ Imported ${fresh.length} placed candidates${newRels.length-fresh.length>0?" ("+( newRels.length-fresh.length)+" skipped — already in your list)":""}`, C.green);
+    render();
+  });
+}
+
+function showPlacedMsg(msg, color) {
+  const e = el("placed-msg");
+  if (e) { e.textContent=msg; e.style.color=color; e.style.display="block"; }
+}
+
+window.addRole = () => {
+  const f=val("s-rfirm"), d=val("s-rdesc"); if(!f||!d) return;
+  state.openRoles.push({id:Date.now(), clientFirm:f, description:d});
+  persist(); render();
+};
+window.removeRole = i => { state.openRoles.splice(i,1); persist(); render(); };
+window.addRel = () => {
+  const name=val("s-rname"); if(!name) return;
+  state.rels.push({id:Date.now(), name, type:val("s-rtype")||"Client Firm", placedYear:val("s-ryear"), notes:val("s-rnotes")});
+  persist(); render();
+};
+window.removeRel = i => { state.rels.splice(i,1); persist(); render(); };
+window.addBench = () => {
+  const name=val("b-name"); if(!name) return;
+  state.bench.push({id:Date.now(), name, practiceArea:val("b-pa"), currentTitle:val("b-title"), currentFirm:val("b-firm"), notes:val("b-notes"), addedAt:new Date().toLocaleDateString()});
+  persist(); render();
+};
+window.removeBench = i => { state.bench.splice(i,1); persist(); render(); };
+
+function bindShell() {}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+document.addEventListener("DOMContentLoaded", () => {
+  try {
+    if (!window._hbKey) state.view = "key";
+    render();
+    if (state.view === "key") bindKey();
+  } catch(e) {
+    document.getElementById("app").innerHTML =
+      '<div style="padding:40px;color:#ef4444;font-family:monospace;font-size:13px;">' +
+      '<div style="font-size:18px;margin-bottom:12px;">⚠ Startup Error</div>' +
+      '<div>' + (e.message||"Unknown error") + '</div>' +
+      '<pre style="margin-top:12px;color:#8a7f6e;font-size:11px;">' + (e.stack||"") + '</pre>' +
+      '</div>';
+  }
+});
+</script>
+</body>
+</html>
